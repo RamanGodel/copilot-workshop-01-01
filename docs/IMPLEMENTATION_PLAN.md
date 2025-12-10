@@ -29,8 +29,8 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
   - `ErrorResponseDTO` (timestamp, status, error, message, path)
 
 ### 1.3 Controllers with Stub Implementation
-- [ ] `CurrencyController`:
-  - `GET /api/v1/currencies` - Return empty list initially
+- [x] `CurrencyController`:
+  - `GET /api/v1/currencies` - Return list of currencies
   - `POST /api/v1/currencies?currency={code}` - Add to in-memory set
   - `POST /api/v1/currencies/refresh` - Return success message
   - `GET /api/v1/currencies/exchange-rates` - Return stubbed rates
@@ -46,32 +46,32 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
 - [x] Implement `PeriodValidator` class
 
 ### 1.5 Exception Handling
-- [ ] Create custom exceptions:
+- [x] Create custom exceptions:
   - `CurrencyNotFoundException`
   - `InvalidCurrencyCodeException`
   - `InvalidPeriodException`
   - `ExchangeRateNotFoundException`
-- [ ] Implement `@RestControllerAdvice` with `GlobalExceptionHandler`:
+- [x] Implement `@RestControllerAdvice` with `GlobalExceptionHandler`:
   - Handle validation errors (`MethodArgumentNotValidException`)
   - Handle custom business exceptions
   - Handle generic exceptions
   - Return proper HTTP status codes and error DTOs
 
 ### 1.6 API Documentation
-- [ ] Configure Springdoc OpenAPI
-- [ ] Add `@Operation`, `@ApiResponse` annotations
-- [ ] Add `@Schema` descriptions for DTOs
-- [ ] Configure Swagger UI at `/swagger-ui.html`
-- [ ] Add API info (title, version, description)
+- [x] Configure Springdoc OpenAPI
+- [x] Add `@Operation`, `@ApiResponse` annotations
+- [x] Add `@Schema` descriptions for DTOs
+- [x] Configure Swagger UI at `/swagger-ui.html`
+- [x] Add API info (title, version, description)
 
 ### 1.7 Testing
-- [ ] Controller tests with `@WebMvcTest`:
+- [x] Controller tests with `@WebMvcTest`:
   - Test all endpoints with valid data
   - Test validation errors
   - Test exception handling
   - Verify response structure
-- [ ] Validation tests for custom validators
-- [ ] Exception handler tests
+- [x] Validation tests for custom validators
+- [x] Exception handler tests
 
 **Deliverables:** Working REST API with stubbed data, full validation, error handling, and Swagger documentation
 
