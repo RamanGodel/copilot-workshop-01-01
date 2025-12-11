@@ -81,20 +81,20 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
 **Goal:** Containerization with PostgreSQL database and 2 mock exchange rate services
 
 ### 2.1 Docker Configuration
-- [ ] Create `Dockerfile` for main application:
+- [x] Create `Dockerfile` for main application:
   - Multi-stage build (Maven + JRE)
   - Use Java 21 base image
   - Expose port 8080
   - Configure healthcheck
 
 ### 2.2 Mock Exchange Rate Services
-- [ ] Create Mock Service 1 (`mock-exchange-service-1`):
+- [x] Create Mock Service 1 (`mock-exchange-service-1`):
   - Simple Spring Boot app on port 8081
   - Endpoint: `GET /rates?base={currency}`
   - Return random rates for EUR, USD, GBP, JPY, etc.
   - Create separate `Dockerfile`
 
-- [ ] Create Mock Service 2 (`mock-exchange-service-2`):
+- [x] Create Mock Service 2 (`mock-exchange-service-2`):
   - Simple Spring Boot app on port 8082
   - Endpoint: `GET /api/rates?from={currency}`
   - Different response format
@@ -102,7 +102,7 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
   - Create separate `Dockerfile`
 
 ### 2.3 Docker Compose
-- [ ] Create `docker-compose.yml`:
+- [x] Create `docker-compose.yml`:
   - PostgreSQL service (port 5432)
     - Environment variables (POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
     - Volume for data persistence
@@ -115,17 +115,17 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
   - Network configuration
 
 ### 2.4 Application Configuration
-- [ ] Update `application.properties` / `application.yml`:
+- [x] Update `application.properties` / `application.yml`:
   - Database connection properties (with environment variables)
   - Logging configuration
   - Mock services URLs
   - Profile-specific configurations (dev, test, prod)
 
 ### 2.5 Testing
-- [ ] Test Docker build for each service
-- [ ] Test docker-compose startup
-- [ ] Verify service connectivity
-- [ ] Test database connection from main app
+- [x] Test Docker build for each service
+- [x] Test docker-compose startup
+- [x] Verify service connectivity
+- [x] Test database connection from main app
 
 **Deliverables:** Fully containerized application with PostgreSQL and mock services
 

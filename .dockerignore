@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings
+
+# Build
+target/
+build/
+out/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+.env
+.env.example
+
+# Test files
+src/test/
+
+# Mock services (not needed in main app image)
+mock-services/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
