@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: currency-exchange-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-currency_exchange}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - currency-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-currency_exchange}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Mock Exchange Service 1
+  mock-service-1:
+    build:
+      context: ./mock-services/mock-exchange-service-1
+      dockerfile: Dockerfile
+    container_name: mock-exchange-service-1
+    ports:
+      - "8081:8081"
+    networks:
+      - currency-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/rates?base=USD"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Mock Exchange Service 2
+  mock-service-2:
+    build:
+      context: ./mock-services/mock-exchange-service-2
+      dockerfile: Dockerfile
+    container_name: mock-exchange-service-2
+    ports:
+      - "8082:8082"
+    networks:
+      - currency-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/api/rates?from=USD"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Main Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: currency-exchange-app
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-currency_exchange}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      MOCK_SERVICE_1_URL: http://mock-service-1:8081
+      MOCK_SERVICE_2_URL: http://mock-service-2:8082
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-service-1:
+        condition: service_healthy
+      mock-service-2:
+        condition: service_healthy
+    networks:
+      - currency-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  currency-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+
