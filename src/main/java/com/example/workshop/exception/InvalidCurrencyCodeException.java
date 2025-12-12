@@ -3,7 +3,7 @@ package com.example.workshop.exception;
 /**
  * Exception thrown when an invalid currency code is provided.
  */
-public class InvalidCurrencyCodeException extends RuntimeException {
+public class InvalidCurrencyCodeException extends IllegalArgumentException {
 
     public InvalidCurrencyCodeException(String message) {
         super(message);
@@ -17,4 +17,3 @@ public class InvalidCurrencyCodeException extends RuntimeException {
         super(message, cause);
     }
 }
-

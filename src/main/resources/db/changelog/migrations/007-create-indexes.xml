@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="007-create-indexes" author="system">
+        <comment>Create indexes for performance optimization</comment>
+
+        <!-- Composite index on exchange_rate for frequent queries -->
+        <createIndex indexName="idx_exchange_rate_composite"
+                     tableName="exchange_rate"
+                     unique="false">
+            <column name="base_currency_id"/>
+            <column name="target_currency_id"/>
+            <column name="timestamp" descending="true"/>
+        </createIndex>
+
+        <!-- Index on timestamp for temporal queries -->
+        <createIndex indexName="idx_exchange_rate_timestamp"
+                     tableName="exchange_rate"
+                     unique="false">
+            <column name="timestamp" descending="true"/>
+        </createIndex>
+
+        <!-- Index on username for authentication lookups -->
+        <createIndex indexName="idx_users_username"
+                     tableName="users"
+                     unique="false">
+            <column name="username"/>
+        </createIndex>
+
+        <!-- Index on email for user lookups -->
+        <createIndex indexName="idx_users_email"
+                     tableName="users"
+                     unique="false">
+            <column name="email"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_exchange_rate_composite" tableName="exchange_rate"/>
+            <dropIndex indexName="idx_exchange_rate_timestamp" tableName="exchange_rate"/>
+            <dropIndex indexName="idx_users_username" tableName="users"/>
+            <dropIndex indexName="idx_users_email" tableName="users"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

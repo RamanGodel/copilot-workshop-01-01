@@ -135,90 +135,91 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
 **Goal:** Spring Data JPA, Liquibase migrations, and persistence layer
 
 ### 3.1 Dependencies
-- [ ] Add Maven dependencies:
-  - Spring Boot Starter Data JPA
-  - PostgreSQL Driver
+- [x] Add Maven dependencies:
+  - Spring Boot Starter Data JPA (already present)
+  - PostgreSQL Driver (already present)
   - Liquibase Core
 
 ### 3.2 Entity Models
-- [ ] Enhance `Currency` entity:
+- [x] Enhance `Currency` entity:
   - `@Entity`, `@Table` annotations
   - `@Id`, `@GeneratedValue` for id
   - Unique constraint on code
   - Timestamps (createdAt, updatedAt)
 
-- [ ] Enhance `ExchangeRate` entity:
+- [x] Enhance `ExchangeRate` entity:
   - JPA annotations
   - `@ManyToOne` relationships to Currency
   - Composite index on (baseCurrency, targetCurrency, timestamp)
   - Validation annotations
 
-- [ ] Create `User` entity:
+- [x] Create `User` entity:
   - id, username, password, email
   - `@ManyToMany` relationship with Role
 
-- [ ] Create `Role` entity:
+- [x] Create `Role` entity:
   - id, name (USER, PREMIUM_USER, ADMIN)
   - `@ManyToMany` relationship with User
 
 ### 3.3 Liquibase Migrations
-- [ ] Configure Liquibase in application properties
-- [ ] Create `db.changelog-master.xml` (or YAML)
-- [ ] Migration 1: Create `currency` table
-- [ ] Migration 2: Create `exchange_rate` table
-- [ ] Migration 3: Create `user` table
-- [ ] Migration 4: Create `role` table
-- [ ] Migration 5: Create `user_roles` join table
-- [ ] Migration 6: Insert default roles (USER, PREMIUM_USER, ADMIN)
-- [ ] Add indexes for performance
+- [x] Configure Liquibase in application properties
+- [x] Create `db.changelog-master.xml` (or YAML)
+- [x] Migration 1: Create `currency` table
+- [x] Migration 2: Create `exchange_rate` table
+- [x] Migration 3: Create `role` table
+- [x] Migration 4: Create `user` table
+- [x] Migration 5: Create `user_roles` join table
+- [x] Migration 6: Insert default roles (USER, PREMIUM_USER, ADMIN)
+- [x] Add indexes for performance
 
 ### 3.4 Repository Layer
-- [ ] Create `CurrencyRepository extends JpaRepository`:
+- [x] Create `CurrencyRepository extends JpaRepository`:
   - `Optional<Currency> findByCode(String code)`
   - `boolean existsByCode(String code)`
 
-- [ ] Create `ExchangeRateRepository extends JpaRepository`:
+- [x] Create `ExchangeRateRepository extends JpaRepository`:
   - `List<ExchangeRate> findByBaseCurrencyAndTargetCurrency(Currency base, Currency target)`
   - `Optional<ExchangeRate> findTopByBaseCurrencyAndTargetCurrencyOrderByTimestampDesc()`
   - `List<ExchangeRate> findByBaseCurrencyAndTargetCurrencyAndTimestampAfter()`
   - Custom query methods with `@Query`
 
-- [ ] Create `UserRepository extends JpaRepository`:
+- [x] Create `UserRepository extends JpaRepository`:
   - `Optional<User> findByUsername(String username)`
 
-- [ ] Create `RoleRepository extends JpaRepository`:
+- [x] Create `RoleRepository extends JpaRepository`:
+  - `Optional<Role> findByName(String name)`
   - `Optional<Role> findByName(String name)`
 
 ### 3.5 Service Layer
-- [ ] Create `CurrencyService`:
+- [x] Create `CurrencyService`:
   - `List<Currency> getAllCurrencies()` (use Optional and Stream API)
   - `Currency addCurrency(String code)` (check duplicates)
   - `Optional<Currency> findByCode(String code)`
 
-- [ ] Create `ExchangeRateService`:
+- [x] Create `ExchangeRateService`:
   - `ExchangeRateResponseDTO getExchangeRate(ExchangeRateRequestDTO request)`
   - `void saveExchangeRate(ExchangeRate rate)`
   - `List<ExchangeRate> getHistoricalRates(String from, String to, LocalDateTime since)`
   - Use Stream API for filtering and transformations
 
 ### 3.6 Update Controllers
-- [ ] Replace stub implementations with actual service calls
-- [ ] Use Optional for null-safe operations
-- [ ] Implement proper error handling for database operations
+- [x] Replace stub implementations with actual service calls
+- [x] Use Optional for null-safe operations
+- [x] Implement proper error handling for database operations
 
 ### 3.7 Testing
-- [ ] Repository tests with `@DataJpaTest`:
+- [x] Repository tests with `@DataJpaTest`:
   - Test CRUD operations
   - Test custom query methods
   - Test relationships
 
-- [ ] Service unit tests with Mockito:
+- [x] Service unit tests with Mockito:
   - Mock repositories
   - Test business logic
   - Test Optional usage
   - Test Stream API operations
 
-- [ ] Integration tests with TestContainers:
+- [x] Integration tests with TestContainers:
   - Test with real PostgreSQL container
   - Test Liquibase migrations
   - Test end-to-end flows
