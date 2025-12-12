@@ -3,7 +3,7 @@ package com.example.workshop.exception;
 /**
  * Exception thrown when a currency is not found in the system.
  */
-public class CurrencyNotFoundException extends RuntimeException {
+public class CurrencyNotFoundException extends IllegalArgumentException {
 
     public CurrencyNotFoundException(String message) {
         super(message);
@@ -17,4 +17,3 @@ public class CurrencyNotFoundException extends RuntimeException {
         super(message, cause);
     }
 }
-

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="006-insert-default-roles" author="system">
+        <comment>Insert default roles: USER, PREMIUM_USER, ADMIN</comment>
+
+        <insert tableName="role">
+            <column name="name" value="USER"/>
+            <column name="description" value="Standard user with basic access to exchange rates"/>
+        </insert>
+
+        <insert tableName="role">
+            <column name="name" value="PREMIUM_USER"/>
+            <column name="description" value="Premium user with access to trends and historical data"/>
+        </insert>
+
+        <insert tableName="role">
+            <column name="name" value="ADMIN"/>
+            <column name="description" value="Administrator with full access to all features"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="role">
+                <where>name IN ('USER', 'PREMIUM_USER', 'ADMIN')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+
