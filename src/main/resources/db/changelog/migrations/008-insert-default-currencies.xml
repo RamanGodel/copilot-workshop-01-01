@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="008-insert-default-currencies" author="system">
+        <comment>Insert a small default set of currencies so the API has initial data</comment>
+
+        <!-- Idempotent inserts (Postgres + H2) -->
+        <sql>
+            INSERT INTO currency (code, name)
+            SELECT 'USD', 'US Dollar'
+            WHERE NOT EXISTS (SELECT 1 FROM currency WHERE code = 'USD');
+
+            INSERT INTO currency (code, name)
+            SELECT 'EUR', 'Euro'
+            WHERE NOT EXISTS (SELECT 1 FROM currency WHERE code = 'EUR');
+
+            INSERT INTO currency (code, name)
+            SELECT 'GBP', 'British Pound'
+            WHERE NOT EXISTS (SELECT 1 FROM currency WHERE code = 'GBP');
+
+            INSERT INTO currency (code, name)
+            SELECT 'PLN', 'Polish Zloty'
+            WHERE NOT EXISTS (SELECT 1 FROM currency WHERE code = 'PLN');
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>
+

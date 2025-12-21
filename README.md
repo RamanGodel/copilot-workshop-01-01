@@ -7,12 +7,48 @@ A comprehensive Spring Boot application that provides up-to-date currency exchan
 - **RESTful API** for currency exchange rates with validation and error handling
 - **Multiple Exchange Rate Providers** with fallback strategies
 - **Database Persistence** with PostgreSQL and Liquibase migrations
-- **Role-Based Security** with Spring Security
+- **🔐 Role-Based Security** with Spring Security (NEW in Phase 4!)
 - **Scheduled Updates** - Automatic hourly rate refresh
 - **Docker Support** - Full containerization with Docker Compose
 - **API Documentation** - Interactive Swagger UI
 - **Comprehensive Testing** - Unit, integration, and functional tests
 - **Code Quality** - CheckStyle, PMD, JaCoCo coverage
+
+## 🔐 Security (Phase 4)
+
+The application implements Spring Security with role-based access control:
+
+### Default User Accounts
+
+| Username | Password | Role | Access Level |
+|----------|----------|------|--------------|
+| `admin` | `admin123` | ADMIN | Full access to all endpoints |
+| `premium` | `premium123` | PREMIUM_USER | Public endpoints + trends |
+| `user` | `user123` | USER | Public endpoints only |
+
+### Endpoint Security
+
+- **Public Access** (no authentication):
+  - `GET /api/v1/currencies` - List currencies
+  - `GET /api/v1/currencies/exchange-rates` - Get exchange rates
+  - `/swagger-ui/**` - API documentation
+
+- **ADMIN Only**:
+  - `POST /api/v1/currencies` - Add currency
+  - `POST /api/v1/currencies/refresh` - Refresh rates
+  - `/actuator/**` - Monitoring endpoints
+
+- **ADMIN & PREMIUM_USER**:
+  - `GET /api/v1/currencies/trends` - Currency trends
+
+### Login
+
+1. Navigate to http://localhost:8080
+2. You'll be redirected to the login page
+3. Use one of the default accounts above
+4. After login, access Swagger UI at http://localhost:8080/swagger-ui.html
+
+📚 **Full Security Documentation**: See [docs/PHASE4_QUICKSTART.md](docs/PHASE4_QUICKSTART.md)
 
 ## 📋 Prerequisites
 

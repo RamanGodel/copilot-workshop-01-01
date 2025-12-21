@@ -35,9 +35,15 @@ class ExchangeRateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        usd = Currency.builder().code("USD").name("US Dollar").build();
-        eur = Currency.builder().code("EUR").name("Euro").build();
-        gbp = Currency.builder().code("GBP").name("British Pound").build();
+        // Ensure clean slate (Liquibase seeds + other tests can add rows)
+        // Bulk JPQL deletes bypass the persistence context, so clear it afterwards.
+        entityManager.getEntityManager().createQuery("DELETE FROM ExchangeRate").executeUpdate();
+        entityManager.getEntityManager().createQuery("DELETE FROM Currency").executeUpdate();
+        entityManager.clear();
+
+        usd = Currency.builder().code("AAA").name("Test Currency AAA").build();
+        eur = Currency.builder().code("BBB").name("Test Currency BBB").build();
+        gbp = Currency.builder().code("CCC").name("Test Currency CCC").build();
 
         entityManager.persist(usd);
         entityManager.persist(eur);
@@ -62,8 +68,8 @@ class ExchangeRateRepositoryTest {
 
         // Then
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getBaseCurrency().getCode()).isEqualTo("USD");
-        assertThat(saved.getTargetCurrency().getCode()).isEqualTo("EUR");
+        assertThat(saved.getBaseCurrency().getCode()).isEqualTo("AAA");
+        assertThat(saved.getTargetCurrency().getCode()).isEqualTo("BBB");
         assertThat(saved.getRate()).isEqualByComparingTo(BigDecimal.valueOf(0.85));
     }
 
@@ -87,8 +93,8 @@ class ExchangeRateRepositoryTest {
         // Then
         assertThat(rates).hasSize(2);
         assertThat(rates).allMatch(r ->
-                r.getBaseCurrency().getCode().equals("USD") &&
-                r.getTargetCurrency().getCode().equals("EUR"));
+                r.getBaseCurrency().getCode().equals("AAA") &&
+                r.getTargetCurrency().getCode().equals("BBB"));
     }
 
     @Test
@@ -154,7 +160,7 @@ class ExchangeRateRepositoryTest {
 
         // Then
         assertThat(rates).hasSize(2);
-        assertThat(rates).allMatch(r -> r.getBaseCurrency().getCode().equals("USD"));
+        assertThat(rates).allMatch(r -> r.getBaseCurrency().getCode().equals("AAA"));
     }
 
     @Test
@@ -227,13 +233,13 @@ class ExchangeRateRepositoryTest {
 
         // Verify we got the latest rate for each target currency
         ExchangeRate eurRate = latestRates.stream()
-                .filter(r -> r.getTargetCurrency().getCode().equals("EUR"))
+                .filter(r -> r.getTargetCurrency().getCode().equals("BBB"))
                 .findFirst()
                 .orElseThrow();
         assertThat(eurRate.getRate()).isEqualByComparingTo(BigDecimal.valueOf(0.87));
 
         ExchangeRate gbpRate = latestRates.stream()
-                .filter(r -> r.getTargetCurrency().getCode().equals("GBP"))
+                .filter(r -> r.getTargetCurrency().getCode().equals("CCC"))
                 .findFirst()
                 .orElseThrow();
         assertThat(gbpRate.getRate()).isEqualByComparingTo(BigDecimal.valueOf(0.76));

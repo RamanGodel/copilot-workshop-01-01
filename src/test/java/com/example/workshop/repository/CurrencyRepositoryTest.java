@@ -1,6 +1,7 @@
 package com.example.workshop.repository;
 
 import com.example.workshop.model.Currency;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +26,29 @@ class CurrencyRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
+    @BeforeEach
+    void cleanDb() {
+        currencyRepository.deleteAll();
+        currencyRepository.flush();
+    }
+
     @Test
     @DisplayName("Should save and find currency by code")
     void shouldSaveAndFindByCode() {
         // Given
         Currency currency = Currency.builder()
-                .code("USD")
-                .name("US Dollar")
+                .code("AAA")
+                .name("Test Currency AAA")
                 .build();
 
         // When
         entityManager.persistAndFlush(currency);
-        Optional<Currency> found = currencyRepository.findByCode("USD");
+        Optional<Currency> found = currencyRepository.findByCode("AAA");
 
         // Then
         assertThat(found).isPresent();
-        assertThat(found.get().getCode()).isEqualTo("USD");
-        assertThat(found.get().getName()).isEqualTo("US Dollar");
+        assertThat(found.get().getCode()).isEqualTo("AAA");
+        assertThat(found.get().getName()).isEqualTo("Test Currency AAA");
         assertThat(found.get().getId()).isNotNull();
         assertThat(found.get().getCreatedAt()).isNotNull();
         assertThat(found.get().getUpdatedAt()).isNotNull();
@@ -62,36 +69,35 @@ class CurrencyRepositoryTest {
     void shouldCheckExistsByCode() {
         // Given
         Currency currency = Currency.builder()
-                .code("EUR")
-                .name("Euro")
+                .code("BBB")
+                .name("Test Currency BBB")
                 .build();
         entityManager.persistAndFlush(currency);
 
         // When & Then
-        assertThat(currencyRepository.existsByCode("EUR")).isTrue();
-        assertThat(currencyRepository.existsByCode("GBP")).isFalse();
+        assertThat(currencyRepository.existsByCode("BBB")).isTrue();
+        assertThat(currencyRepository.existsByCode("CCC")).isFalse();
     }
 
     @Test
     @DisplayName("Should find all currencies")
     void shouldFindAllCurrencies() {
         // Given
-        Currency usd = Currency.builder().code("USD").name("US Dollar").build();
-        Currency eur = Currency.builder().code("EUR").name("Euro").build();
-        Currency gbp = Currency.builder().code("GBP").name("British Pound").build();
+        Currency c1 = Currency.builder().code("CCC").name("Test Currency CCC").build();
+        Currency c2 = Currency.builder().code("DDD").name("Test Currency DDD").build();
+        Currency c3 = Currency.builder().code("EEE").name("Test Currency EEE").build();
 
-        entityManager.persist(usd);
-        entityManager.persist(eur);
-        entityManager.persist(gbp);
+        entityManager.persist(c1);
+        entityManager.persist(c2);
+        entityManager.persist(c3);
         entityManager.flush();
 
         // When
         var currencies = currencyRepository.findAll();
 
         // Then
-        assertThat(currencies).hasSize(3);
         assertThat(currencies).extracting(Currency::getCode)
-                .containsExactlyInAnyOrder("USD", "EUR", "GBP");
+                .contains("CCC", "DDD", "EEE");
     }
 
     @Test
@@ -99,15 +105,15 @@ class CurrencyRepositoryTest {
     void shouldEnforceUniqueConstraintOnCode() {
         // Given
         Currency currency1 = Currency.builder()
-                .code("USD")
-                .name("US Dollar")
+                .code("FFF")
+                .name("Test Currency FFF")
                 .build();
         entityManager.persistAndFlush(currency1);
 
         // When & Then
         Currency currency2 = Currency.builder()
-                .code("USD")
-                .name("United States Dollar")
+                .code("FFF")
+                .name("Test Currency FFF Duplicate")
                 .build();
 
         // This should throw an exception due to unique constraint
@@ -126,8 +132,8 @@ class CurrencyRepositoryTest {
     void shouldSaveCurrencyWithTimestamps() {
         // Given
         Currency currency = Currency.builder()
-                .code("JPY")
-                .name("Japanese Yen")
+                .code("GGG")
+                .name("Test Currency GGG")
                 .build();
 
         // When
@@ -140,4 +146,3 @@ class CurrencyRepositoryTest {
         assertThat(saved.getCreatedAt()).isEqualTo(saved.getUpdatedAt());
     }
 }
-
