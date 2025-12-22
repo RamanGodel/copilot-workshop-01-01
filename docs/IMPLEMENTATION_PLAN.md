@@ -294,60 +294,60 @@ A Spring Boot application that provides up-to-date currency exchange rates from 
 **Goal:** HTTP clients for real exchange rate providers with error handling
 
 ### 5.1 Dependencies
-- [ ] Add Spring Boot Starter WebClient (or RestTemplate)
-- [ ] Add Resilience4j (for circuit breaker, retry)
+- [x] Add Spring Boot Starter WebClient (or RestTemplate)
+- [x] Add Resilience4j (for circuit breaker, retry)
 
 ### 5.2 Provider Interfaces
-- [ ] Create `ExchangeRateProvider` interface:
+- [x] Create `ExchangeRateProvider` interface:
   - `Map<String, BigDecimal> getExchangeRates(String baseCurrency)`
   - `String getProviderName()`
 
 ### 5.3 Provider Implementations
-- [ ] Implement `FixerIoProvider`:
+- [x] Implement `FixerIoProvider`:
   - HTTP client to fixer.io API
   - Parse JSON response
   - Handle API errors
   - Use Optional for nullable values
 
-- [ ] Implement `ExchangeRatesApiProvider`:
+- [x] Implement `ExchangeRatesApiProvider`:
   - HTTP client to exchangeratesapi.io
   - Parse response
   - Error handling
 
-- [ ] Implement `MockProvider1Client`:
+- [x] Implement `MockProvider1Client`:
   - Call local mock service 1
   - Parse response
 
-- [ ] Implement `MockProvider2Client`:
+- [x] Implement `MockProvider2Client`:
   - Call local mock service 2
   - Parse response
 
 ### 5.4 Provider Aggregator
-- [ ] Create `ExchangeRateProviderAggregator`:
+- [x] Create `ExchangeRateProviderAggregator`:
   - Use Stream API to call all providers
   - Aggregate results (average, median, or fallback strategy)
   - Handle partial failures
   - Log provider responses
 
 ### 5.5 Configuration
-- [ ] Externalize API keys and URLs in application properties
-- [ ] Create provider-specific configuration classes
-- [ ] Configure timeouts and connection pools
+- [x] Externalize API keys and URLs in application properties
+- [x] Create provider-specific configuration classes
+- [x] Configure timeouts and connection pools
 
 ### 5.6 Error Handling
-- [ ] Create provider-specific exceptions
-- [ ] Implement fallback strategies
-- [ ] Add circuit breaker with Resilience4j
-- [ ] Add retry logic
+- [x] Create provider-specific exceptions
+- [x] Implement fallback strategies
+- [x] Add circuit breaker with Resilience4j
+- [x] Add retry logic
 
 ### 5.7 Testing
-- [ ] Unit tests with WireMock:
+- [x] Unit tests with WireMock:
   - Mock external API responses
   - Test success scenarios
   - Test error scenarios (timeout, 4xx, 5xx)
   - Test fallback logic
 
-- [ ] Integration tests:
+- [x] Integration tests:
   - Test with real mock services
   - Test provider aggregation
   - Test circuit breaker behavior
