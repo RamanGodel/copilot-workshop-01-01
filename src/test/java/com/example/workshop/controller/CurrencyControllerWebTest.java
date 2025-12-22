@@ -10,6 +10,7 @@ import com.example.workshop.model.Currency;
 import com.example.workshop.model.ExchangeRate;
 import com.example.workshop.service.CurrencyService;
 import com.example.workshop.service.CustomUserDetailsService;
+import com.example.workshop.service.ExchangeRateRefreshService;
 import com.example.workshop.service.ExchangeRateService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -49,6 +51,9 @@ class CurrencyControllerWebTest {
 
     @MockBean
     private ExchangeRateService exchangeRateService;
+
+    @MockBean
+    private ExchangeRateRefreshService exchangeRateRefreshService;
 
     @MockBean
     private CustomUserDetailsService userDetailsService;
@@ -170,8 +175,8 @@ class CurrencyControllerWebTest {
     @DisplayName("POST /api/v1/currencies/refresh - Should require ADMIN role")
     @WithMockUser(roles = "ADMIN")
     void testRefreshExchangeRates_Success() throws Exception {
-        // Mock getAllCurrencies to return empty list
-        when(currencyService.getAllCurrencies()).thenReturn(Collections.emptyList());
+        when(exchangeRateRefreshService.refreshAll())
+                .thenReturn(new ExchangeRateRefreshService.RefreshSummary(0, 0, 0, 0, List.of()));
 
         mockMvc.perform(post("/api/v1/currencies/refresh")
                 .contentType(MediaType.APPLICATION_JSON))

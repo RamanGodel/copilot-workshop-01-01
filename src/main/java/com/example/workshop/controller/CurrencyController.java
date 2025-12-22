@@ -4,6 +4,7 @@ import com.example.workshop.dto.*;
 import com.example.workshop.model.Currency;
 import com.example.workshop.model.ExchangeRate;
 import com.example.workshop.service.CurrencyService;
+import com.example.workshop.service.ExchangeRateRefreshService;
 import com.example.workshop.service.ExchangeRateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +37,7 @@ public class CurrencyController {
 
     private final CurrencyService currencyService;
     private final ExchangeRateService exchangeRateService;
+    private final ExchangeRateRefreshService exchangeRateRefreshService;
 
     @Operation(
         summary = "Get all currencies",
@@ -126,15 +128,20 @@ public class CurrencyController {
     public ResponseEntity<Map<String, String>> refreshExchangeRates() {
         log.info("Refreshing exchange rates for all currencies");
 
-        // Get all currencies count
-        List<Currency> currencies = currencyService.getAllCurrencies();
+        ExchangeRateRefreshService.RefreshSummary summary = exchangeRateRefreshService.refreshAll();
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Exchange rates refresh triggered");
         response.put("timestamp", LocalDateTime.now().toString());
-        response.put("currenciesInSystem", String.valueOf(currencies.size()));
+        response.put("currenciesInSystem", String.valueOf(summary.getCurrenciesInSystem()));
         // For compatibility with tests that expect this key
-        response.put("currenciesProcessed", String.valueOf(currencies.size()));
+        response.put("currenciesProcessed", String.valueOf(summary.getCurrenciesProcessed()));
+        response.put("providersWithData", String.valueOf(summary.getProvidersWithData()));
+        response.put("ratesSaved", String.valueOf(summary.getRatesSaved()));
+
+        if (summary.getFailures() != null && !summary.getFailures().isEmpty()) {
+            response.put("failures", String.valueOf(summary.getFailures().size()));
+        }
 
         return ResponseEntity.ok(response);
     }
