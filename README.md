@@ -157,6 +157,15 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 curl "http://localhost:8080/api/v1/currencies/exchange-rates?from=USD&to=EUR&amount=100"
 ```
 
+> Note: This endpoint returns the **latest persisted rate** from the database. If you see
+> `"No exchange rate found for USD to EUR"`, trigger a refresh first (ADMIN-only):
+>
+> ```bash
+> # Login as admin (default: admin/admin123) using Swagger UI,
+> # or send a session cookie with curl after authenticating.
+> curl -X POST "http://localhost:8080/api/v1/currencies/refresh"
+> ```
+
 ### Example Response
 
 ```json
@@ -344,4 +353,3 @@ This project is for educational purposes.
 ---
 
 **Happy Coding! 🎉**
-

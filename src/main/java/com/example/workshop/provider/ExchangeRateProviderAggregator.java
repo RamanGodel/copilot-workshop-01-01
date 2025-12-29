@@ -78,23 +78,38 @@ public class ExchangeRateProviderAggregator {
 
         for (ExchangeRateProvider provider : orderedProviders) {
             String providerName = provider.getProviderName();
-
+            log.debug("Provider attempt start: provider={}, base={}", providerName, baseCurrencyCode);
             try {
                 Optional<ProviderRatesResponse> resp = callWithResilience(provider, baseCurrencyCode);
-                attempts.add(ProviderAttempt.success(providerName, resp.isPresent(), null));
 
-                if (resp.isPresent() && resp.get().getRates() != null && !resp.get().getRates().isEmpty()) {
-                    return AggregationResult.success(resp.get(), attempts);
+                boolean present = resp.isPresent();
+                int rateCount = present && resp.get().getRates() != null ? resp.get().getRates().size() : 0;
+
+                if (!present) {
+                    log.debug("Provider attempt result: provider={}, outcome=EMPTY (disabled/no-data)", providerName);
+                    attempts.add(ProviderAttempt.success(providerName, false, null));
+                    continue;
                 }
+
+                if (rateCount <= 0) {
+                    log.debug("Provider attempt result: provider={}, outcome=EMPTY_RATES", providerName);
+                    attempts.add(ProviderAttempt.success(providerName, false, null));
+                    continue;
+                }
+
+                log.info("Provider selected: provider={}, base={}, rates={}", providerName, resp.get().getBase(), rateCount);
+                attempts.add(ProviderAttempt.success(providerName, true, null));
+                return AggregationResult.success(resp.get(), attempts);
             } catch (ProviderUnavailableException ex) {
-                log.warn("Provider {} failed: {}", providerName, ex.getMessage());
+                log.warn("Provider attempt failed: provider={}, error={}", providerName, ex.getMessage());
                 attempts.add(ProviderAttempt.failure(providerName, ex.getMessage()));
             } catch (RuntimeException ex) {
-                log.warn("Provider {} unexpected failure: {}", providerName, ex.getMessage());
+                log.warn("Provider attempt unexpected failure: provider={}, error={}", providerName, ex.getMessage());
                 attempts.add(ProviderAttempt.failure(providerName, ex.getMessage()));
             }
         }
 
+        log.info("No provider returned rates for base={}. Attempts={}", baseCurrencyCode, attempts.size());
         return AggregationResult.noData(attempts);
     }
 
