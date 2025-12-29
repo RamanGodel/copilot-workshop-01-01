@@ -69,6 +69,19 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
       MOCK_SERVICE_1_URL: http://mock-service-1:8081
       MOCK_SERVICE_2_URL: http://mock-service-2:8082
+
+      # External Providers (Phase 5) - provide via host env vars / .env (do not hardcode secrets)
+      PROVIDER_FIXER_ACCESS_KEY: ${PROVIDER_FIXER_ACCESS_KEY:-}
+      PROVIDER_EXCHANGERATESAPI_ACCESS_KEY: ${PROVIDER_EXCHANGERATESAPI_ACCESS_KEY:-}
+
+      # Optional overrides
+      PROVIDER_FIXER_BASE_URL: ${PROVIDER_FIXER_BASE_URL:-https://data.fixer.io/api}
+      PROVIDER_EXCHANGERATESAPI_BASE_URL: ${PROVIDER_EXCHANGERATESAPI_BASE_URL:-https://api.exchangeratesapi.io/v1}
+
+      # Optional: corporate TLS interception support.
+      # If you are behind a proxy that re-signs TLS certs, mount your root CA to /usr/local/share/ca-certificates/corp-root-ca.crt
+      # and set CORPORATE_CA_ENABLED=true.
+      CORPORATE_CA_ENABLED: ${CORPORATE_CA_ENABLED:-false}
     ports:
       - "8080:8080"
     depends_on:
@@ -86,6 +99,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    volumes:
+      # Optional: place a PEM-encoded corporate root CA at ./certs/corp-root-ca.crt
+      # (Create the file locally; do not commit it.)
+      - ./certs/corp-root-ca.crt:/usr/local/share/ca-certificates/corp-root-ca.crt:ro
+      # Optional: provider-specific intermediate/root certificates (PEM)
+      - ./certs/fixer.io.crt:/usr/local/share/ca-certificates/fixer.io.crt:ro
+      - ./certs/exchangeratesapi.io.crt:/usr/local/share/ca-certificates/exchangeratesapi.io.crt:ro
 
 networks:
   currency-network:

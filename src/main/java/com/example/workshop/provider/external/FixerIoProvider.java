@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -64,6 +65,12 @@ public class FixerIoProvider implements ExchangeRateProvider {
         return uri;
     }
 
+    @PostConstruct
+    void logConfiguration() {
+        boolean enabled = accessKey != null && !accessKey.isBlank();
+        log.info("Provider {} configured: enabled={}, baseUrl={}", getProviderName(), enabled, baseUri);
+    }
+
     @Override
     public String getProviderName() {
         return PROVIDER_NAME;
@@ -81,10 +88,14 @@ public class FixerIoProvider implements ExchangeRateProvider {
             throw new IllegalArgumentException("baseCurrencyCode must not be blank");
         }
 
+        // IMPORTANT: Free plan only supports EUR as base currency
+        // Always request EUR and convert to requested base if needed
+        boolean needsConversion = !"EUR".equalsIgnoreCase(base);
+
         String url = UriComponentsBuilder.fromUri(baseUri)
                 .pathSegment("latest")
                 .queryParam("access_key", accessKey)
-                .queryParam("base", base)
+                .queryParam("base", "EUR")  // Always use EUR for free plan
                 .toUriString();
 
         try {
@@ -110,13 +121,21 @@ public class FixerIoProvider implements ExchangeRateProvider {
                 return Optional.empty();
             }
 
+            // Convert rates from EUR base to requested base if needed
+            if (needsConversion) {
+                rates = convertRatesFromEurTo(base, rates);
+                if (rates.isEmpty()) {
+                    return Optional.empty();
+                }
+            }
+
             LocalDateTime ts = body.getTimestamp() == null
                     ? LocalDateTime.now(ZoneOffset.UTC)
                     : LocalDateTime.ofInstant(Instant.ofEpochSecond(body.getTimestamp()), ZoneOffset.UTC);
 
             return Optional.of(ProviderRatesResponse.builder()
                     .provider(getProviderName())
-                    .base(body.getBase() == null ? base : body.getBase())
+                    .base(base)  // Use requested base, not EUR
                     .timestamp(ts)
                     .rates(rates)
                     .build());
@@ -124,5 +143,42 @@ public class FixerIoProvider implements ExchangeRateProvider {
             log.warn("Provider {} call failed: {}", getProviderName(), e.getMessage());
             throw new ProviderUnavailableException("Provider " + getProviderName() + " call failed", e);
         }
+    }
+
+    /**
+     * Convert rates from EUR base to another base currency.
+     * Formula: newRate = oldRate / baseRate
+     * 
+     * @param newBase Target base currency
+     * @param eurRates Rates with EUR as base
+     * @return Converted rates with newBase as base
+     */
+    private Map<String, java.math.BigDecimal> convertRatesFromEurTo(String newBase, Map<String, java.math.BigDecimal> eurRates) {
+        // Get the rate of the new base currency against EUR
+        java.math.BigDecimal baseRate = eurRates.get(newBase.toUpperCase());
+        
+        if (baseRate == null || baseRate.compareTo(java.math.BigDecimal.ZERO) == 0) {
+            log.warn("Cannot convert to base {}: rate not found or zero", newBase);
+            return Map.of();
+        }
+        
+        // Convert all rates
+        Map<String, java.math.BigDecimal> convertedRates = new java.util.HashMap<>();
+        
+        // Add the base currency itself with rate 1.0
+        convertedRates.put(newBase.toUpperCase(), java.math.BigDecimal.ONE);
+        
+        // Convert other currencies: newRate = oldRate / baseRate
+        for (Map.Entry<String, java.math.BigDecimal> entry : eurRates.entrySet()) {
+            String currency = entry.getKey();
+            if (!currency.equalsIgnoreCase(newBase)) {
+                java.math.BigDecimal newRate = entry.getValue()
+                        .divide(baseRate, 6, java.math.RoundingMode.HALF_UP);
+                convertedRates.put(currency, newRate);
+            }
+        }
+        
+        log.debug("Converted {} rates from EUR to {} base", convertedRates.size(), newBase);
+        return convertedRates;
     }
 }

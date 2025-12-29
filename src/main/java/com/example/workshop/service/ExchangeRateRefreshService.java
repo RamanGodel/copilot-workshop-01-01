@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +23,13 @@ public class ExchangeRateRefreshService {
     private final ExchangeRateService exchangeRateService;
     private final ExchangeRateProviderAggregator aggregator;
 
-    @Transactional
+    /**
+     * Refreshes rates for all base currencies.
+     *
+     * Important: Do not run the whole refresh in a single transaction.
+     * Individual save failures (e.g., missing target currency) should not mark the whole
+     * refresh as rollback-only.
+     */
     public RefreshSummary refreshAll() {
         List<Currency> currencies = currencyService.getAllCurrencies();
 
@@ -60,8 +65,14 @@ public class ExchangeRateRefreshService {
                 }
 
                 try {
-                    // This will throw if target currency isn't in DB; we treat it as a skip.
-                    exchangeRateService.saveExchangeRate(base.getCode(), targetCode.toUpperCase(), rate, timestamp);
+                    // Persist each rate in its own transaction. This prevents a single failure from
+                    // rolling back the whole refresh operation.
+                    exchangeRateService.saveExchangeRate(
+                        base.getCode(),
+                        targetCode.toUpperCase(),
+                        rate,
+                        timestamp
+                    );
                     ratesSaved++;
                 } catch (RuntimeException ex) {
                     failures.add("Failed to save rate " + base.getCode() + "->" + targetCode + ": " + ex.getMessage());
@@ -81,4 +92,3 @@ public class ExchangeRateRefreshService {
         List<String> failures;
     }
 }
-
