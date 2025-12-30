@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="009-add-performance-indexes" author="system">
+        <comment>Phase 7.2: Add additional indexes for performance optimization</comment>
+
+        <!-- Index on base_currency_id for faster lookups of all rates for a base currency -->
+        <createIndex indexName="idx_exchange_rate_base_currency"
+                     tableName="exchange_rate"
+                     unique="false">
+            <column name="base_currency_id"/>
+        </createIndex>
+
+        <!-- Index on target_currency_id for faster lookups of all rates for a target currency -->
+        <createIndex indexName="idx_exchange_rate_target_currency"
+                     tableName="exchange_rate"
+                     unique="false">
+            <column name="target_currency_id"/>
+        </createIndex>
+
+        <!-- Index on currency code for faster lookups -->
+        <createIndex indexName="idx_currency_code"
+                     tableName="currency"
+                     unique="false">
+            <column name="code"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_exchange_rate_base_currency" tableName="exchange_rate"/>
+            <dropIndex indexName="idx_exchange_rate_target_currency" tableName="exchange_rate"/>
+            <dropIndex indexName="idx_currency_code" tableName="currency"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -14,5 +14,6 @@
     <include file="db/changelog/migrations/006-insert-default-roles.xml"/>
     <include file="db/changelog/migrations/007-create-indexes.xml"/>
     <include file="db/changelog/migrations/008-insert-default-currencies.xml"/>
+    <include file="db/changelog/migrations/009-add-performance-indexes.xml"/>
 
 </databaseChangeLog>

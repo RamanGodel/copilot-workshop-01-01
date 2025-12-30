@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -214,6 +216,41 @@ public class ExchangeRateService {
                 .orElseThrow(() -> new CurrencyNotFoundException("Currency not found: " + baseCurrencyCode));
 
         return exchangeRateRepository.findByBaseCurrency(baseCurrency);
+    }
+
+    /**
+     * Get exchange rates for a base currency with pagination support.
+     * (Phase 7.2: Performance Optimizations)
+     *
+     * @param baseCurrencyCode the base currency code
+     * @param pageable pagination parameters (page number, size, sort)
+     * @return page of exchange rates
+     * @throws CurrencyNotFoundException if the currency is not found
+     */
+    @Transactional(readOnly = true)
+    public Page<ExchangeRate> getRatesForBaseCurrencyPaginated(String baseCurrencyCode, Pageable pageable) {
+        log.debug("Getting paginated rates for base currency: {} (page: {}, size: {})",
+                baseCurrencyCode, pageable.getPageNumber(), pageable.getPageSize());
+
+        Currency baseCurrency = currencyRepository.findByCode(baseCurrencyCode)
+                .orElseThrow(() -> new CurrencyNotFoundException("Currency not found: " + baseCurrencyCode));
+
+        return exchangeRateRepository.findByBaseCurrency(baseCurrency, pageable);
+    }
+
+    /**
+     * Get all exchange rates with pagination support.
+     * (Phase 7.2: Performance Optimizations)
+     *
+     * @param pageable pagination parameters (page number, size, sort)
+     * @return page of exchange rates
+     */
+    @Transactional(readOnly = true)
+    public Page<ExchangeRate> getAllRatesPaginated(Pageable pageable) {
+        log.debug("Getting all paginated rates (page: {}, size: {})",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        return exchangeRateRepository.findAll(pageable);
     }
 
     /**
