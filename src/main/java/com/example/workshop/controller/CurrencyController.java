@@ -252,7 +252,8 @@ public class CurrencyController {
 
     @Operation(
         summary = "Get paginated exchange rates",
-        description = "Retrieves exchange rates with pagination and sorting support (Phase 7.2: Performance Optimizations)"
+        description = "Retrieves exchange rates with pagination and sorting "
+            + "(Phase 7.2: Performance Optimizations)"
     )
     @ApiResponses(value = {
         @ApiResponse(
