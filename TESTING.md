@@ -221,9 +221,13 @@ mvn clean test -Pmutation org.pitest:pitest-maven:mutationCoverage
 
 JaCoCo measures line and branch coverage.
 
-**Thresholds**:
-- Line Coverage: 80%
-- Branch Coverage: 70%
+**Current Metrics**:
+- Line Coverage: ~79% (991/1257 lines covered)
+- Branch Coverage: ~18% (216/1228 branches covered)
+
+**Configured Thresholds**:
+- Line Coverage: 75%
+- Branch Coverage: 15%
 
 **Reports**:
 - HTML: `target/site/jacoco/index.html`
