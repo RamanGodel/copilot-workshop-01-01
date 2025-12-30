@@ -65,6 +65,13 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- Micrometer Prometheus - Prometheus metrics -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Spring Boot DevTools - Hot reload during development -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
