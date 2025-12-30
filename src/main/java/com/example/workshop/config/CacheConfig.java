@@ -2,6 +2,7 @@ package com.example.workshop.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -75,9 +76,12 @@ public class CacheConfig {
      * Scheduled task to evict all caches every hour.
      * This ensures that cached data doesn't become stale.
      * Runs at the top of every hour (0 minutes, 0 seconds).
+     * 
+     * Only enabled in production environments (not for tests).
      */
     @Scheduled(cron = "0 0 * * * *")
     @CacheEvict(value = {CURRENCIES_CACHE, CURRENCY_BY_CODE_CACHE, LATEST_RATES_CACHE}, allEntries = true)
+    @ConditionalOnProperty(value = "cache.scheduled-eviction.enabled", havingValue = "true", matchIfMissing = true)
     public void evictAllCachesScheduled() {
         log.info("Scheduled cache eviction: All caches evicted");
     }
