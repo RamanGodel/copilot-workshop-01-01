@@ -2,6 +2,8 @@ package com.example.workshop.security;
 
 import com.example.workshop.model.Role;
 import com.example.workshop.model.User;
+import com.example.workshop.provider.ExchangeRateProvider;
+import com.example.workshop.provider.ProviderRatesResponse;
 import com.example.workshop.repository.CurrencyRepository;
 import com.example.workshop.repository.RoleRepository;
 import com.example.workshop.repository.UserRepository;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -18,8 +21,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,12 +56,27 @@ class SecurityConfigTest {
     @Autowired
     private CurrencyRepository currencyRepository;
 
+    @MockBean(name = "mockProvider1Client")
+    private ExchangeRateProvider mockProvider1;
+
+    @MockBean(name = "mockProvider2Client")
+    private ExchangeRateProvider mockProvider2;
+
     private Role adminRole;
     private Role premiumUserRole;
     private Role userRole;
 
     @BeforeEach
     void setUp() {
+        // Mock providers to return successful responses for health checks
+        ProviderRatesResponse mockResponse = ProviderRatesResponse.builder()
+                .provider("mock-provider")
+                .base("USD")
+                .rates(Map.of("EUR", BigDecimal.valueOf(0.85)))
+                .build();
+        when(mockProvider1.fetchLatestRates(anyString())).thenReturn(Optional.of(mockResponse));
+        when(mockProvider2.fetchLatestRates(anyString())).thenReturn(Optional.of(mockResponse));
+
         // Clean up users and flush to database
         userRepository.deleteAll();
         userRepository.flush();
@@ -241,7 +264,8 @@ class SecurityConfigTest {
     @WithAnonymousUser
     void testActuatorHealth_withoutAuth_shouldSucceed() throws Exception {
         mockMvc.perform(get("/actuator/health"))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
     }
 
     @Test
@@ -249,6 +273,7 @@ class SecurityConfigTest {
     @WithMockUser(username = "user", roles = {"USER"})
     void testActuatorHealth_withUserRole_shouldSucceed() throws Exception {
         mockMvc.perform(get("/actuator/health"))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
     }
 }
