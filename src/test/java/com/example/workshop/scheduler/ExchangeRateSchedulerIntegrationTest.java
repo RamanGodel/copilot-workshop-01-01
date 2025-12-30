@@ -20,8 +20,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:testdb",
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+        "spring.datasource.driver-class-name=org.h2.Driver"
 })
 class ExchangeRateSchedulerIntegrationTest {
 
@@ -34,6 +33,9 @@ class ExchangeRateSchedulerIntegrationTest {
     @Test
     void scheduledTaskCanBeInvokedManually() {
         // Given
+        // Reset mock to clear any startup initialization calls
+        reset(refreshService);
+        
         ExchangeRateRefreshService.RefreshSummary summary = new ExchangeRateRefreshService.RefreshSummary(
                 5, 5, 2, 20, Collections.emptyList()
         );
@@ -49,6 +51,9 @@ class ExchangeRateSchedulerIntegrationTest {
     @Test
     void scheduledTaskHandlesExceptions() {
         // Given
+        // Reset mock to clear any startup initialization calls
+        reset(refreshService);
+        
         when(refreshService.refreshAll()).thenThrow(new RuntimeException("Test exception"));
 
         // When - should not throw

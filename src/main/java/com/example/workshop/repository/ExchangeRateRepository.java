@@ -2,6 +2,9 @@ package com.example.workshop.repository;
 
 import com.example.workshop.model.Currency;
 import com.example.workshop.model.ExchangeRate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,11 +23,13 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
 
     /**
      * Find all exchange rates between two currencies.
+     * Uses @EntityGraph to eagerly fetch currency relationships and avoid N+1 queries.
      *
      * @param baseCurrency   the base currency
      * @param targetCurrency the target currency
      * @return list of exchange rates
      */
+    @EntityGraph(attributePaths = {"baseCurrency", "targetCurrency"})
     List<ExchangeRate> findByBaseCurrencyAndTargetCurrency(Currency baseCurrency, Currency targetCurrency);
 
     /**
@@ -77,6 +82,7 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
 
     /**
      * Find exchange rates within a time range.
+     * Uses @EntityGraph to eagerly fetch currency relationships and avoid N+1 queries.
      *
      * @param baseCurrency   the base currency
      * @param targetCurrency the target currency
@@ -84,6 +90,7 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
      * @param endTime        the end of the time range
      * @return list of exchange rates
      */
+    @EntityGraph(attributePaths = {"baseCurrency", "targetCurrency"})
     @Query("""
             SELECT e FROM ExchangeRate e
             WHERE e.baseCurrency = :baseCurrency
@@ -105,5 +112,38 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
      * @return count of exchange rates
      */
     long countByBaseCurrencyAndTargetCurrency(Currency baseCurrency, Currency targetCurrency);
-}
 
+    /**
+     * Find all exchange rates with pagination support.
+     * Uses @EntityGraph to eagerly fetch currency relationships and avoid N+1 queries.
+     *
+     * @param pageable pagination parameters
+     * @return page of exchange rates
+     */
+    @EntityGraph(attributePaths = {"baseCurrency", "targetCurrency"})
+    Page<ExchangeRate> findAll(Pageable pageable);
+
+    /**
+     * Find exchange rates for a specific base currency with pagination.
+     * Uses @EntityGraph to eagerly fetch currency relationships and avoid N+1 queries.
+     *
+     * @param baseCurrency the base currency
+     * @param pageable pagination parameters
+     * @return page of exchange rates
+     */
+    @EntityGraph(attributePaths = {"baseCurrency", "targetCurrency"})
+    Page<ExchangeRate> findByBaseCurrency(Currency baseCurrency, Pageable pageable);
+
+    /**
+     * Find exchange rates between two currencies with pagination.
+     * Uses @EntityGraph to eagerly fetch currency relationships and avoid N+1 queries.
+     *
+     * @param baseCurrency   the base currency
+     * @param targetCurrency the target currency
+     * @param pageable pagination parameters
+     * @return page of exchange rates
+     */
+    @EntityGraph(attributePaths = {"baseCurrency", "targetCurrency"})
+    Page<ExchangeRate> findByBaseCurrencyAndTargetCurrency(
+            Currency baseCurrency, Currency targetCurrency, Pageable pageable);
+}

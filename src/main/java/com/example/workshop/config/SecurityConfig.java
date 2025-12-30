@@ -42,6 +42,7 @@ public class SecurityConfig {
                 // Public endpoints - no authentication required
                 .requestMatchers(HttpMethod.GET, "/api/v1/currencies").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/currencies/exchange-rates").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/currencies/exchange-rates/paginated").permitAll()
 
                 // Login + static assets
                 .requestMatchers(

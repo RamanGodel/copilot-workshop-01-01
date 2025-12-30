@@ -16,6 +16,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -246,7 +250,79 @@ public class CurrencyController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+        summary = "Get paginated exchange rates",
+        description = "Retrieves exchange rates with pagination and sorting support (Phase 7.2: Performance Optimizations)"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved paginated exchange rates",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PageResponseDTO.class)
+            )
+        )
+    })
+    @GetMapping("/exchange-rates/paginated")
+    public ResponseEntity<PageResponseDTO<ExchangeRateDTO>> getPaginatedExchangeRates(
+        @Parameter(description = "Base currency code (optional)", example = "EUR")
+        @RequestParam(required = false) String base,
+        @Parameter(description = "Page number (zero-based)", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "Page size", example = "20")
+        @RequestParam(defaultValue = "20") int size,
+        @Parameter(description = "Sort field", example = "timestamp")
+        @RequestParam(defaultValue = "timestamp") String sortBy,
+        @Parameter(description = "Sort direction (asc or desc)", example = "desc")
+        @RequestParam(defaultValue = "desc") String direction
+    ) {
+        log.info("Fetching paginated exchange rates (base: {}, page: {}, size: {}, sort: {} {})",
+                base, page, size, sortBy, direction);
+
+        Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
+        Page<ExchangeRate> ratePage;
+        if (base != null && !base.isBlank()) {
+            ratePage = exchangeRateService.getRatesForBaseCurrencyPaginated(base.toUpperCase(), pageable);
+        } else {
+            ratePage = exchangeRateService.getAllRatesPaginated(pageable);
+        }
+
+        // Convert to DTOs
+        List<ExchangeRateDTO> rateDTOs = ratePage.getContent().stream()
+                .map(this::convertToDTO)
+                .toList();
+
+        PageResponseDTO<ExchangeRateDTO> response = PageResponseDTO.<ExchangeRateDTO>builder()
+                .content(rateDTOs)
+                .pageNumber(ratePage.getNumber())
+                .pageSize(ratePage.getSize())
+                .totalElements(ratePage.getTotalElements())
+                .totalPages(ratePage.getTotalPages())
+                .first(ratePage.isFirst())
+                .last(ratePage.isLast())
+                .hasNext(ratePage.hasNext())
+                .hasPrevious(ratePage.hasPrevious())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
     // Helper methods
+
+    private ExchangeRateDTO convertToDTO(ExchangeRate rate) {
+        return ExchangeRateDTO.builder()
+                .id(rate.getId())
+                .baseCurrencyCode(rate.getBaseCurrency().getCode())
+                .baseCurrencyName(rate.getBaseCurrency().getName())
+                .targetCurrencyCode(rate.getTargetCurrency().getCode())
+                .targetCurrencyName(rate.getTargetCurrency().getName())
+                .rate(rate.getRate())
+                .timestamp(rate.getTimestamp())
+                .build();
+    }
 
     private LocalDateTime calculateStartTime(String period, LocalDateTime endTime) {
         String unit = period.substring(period.length() - 1);

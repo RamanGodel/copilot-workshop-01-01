@@ -1,7 +1,8 @@
-- After each code change ensure that all automated tests pass with "mvn clean test".
+- After each code change ensure that all tests pass with "mvn clean test".
 - All documentation is stored in the `docs/` directory at the root of the repository.
 - Raw requirements and design documents are stored in the `docs/requirements/`.
 - The Software Requirements Specification (SRS) document is available at `docs/SRS.md` and contains the complete functional and technical requirements for the Currency Exchange Rates Provider Service.
 - Prefer SRS as the source of truth for requirements over individual design documents.
 - When updating design documents, ensure that the SRS is also updated to reflect any changes.
 - Try to add a new tests when a new feature is added or an existing feature is modified.
+- Do not commit and push changes without asking
