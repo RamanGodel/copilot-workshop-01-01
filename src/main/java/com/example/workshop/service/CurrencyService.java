@@ -1,11 +1,14 @@
 package com.example.workshop.service;
 
+import com.example.workshop.config.CacheConfig;
 import com.example.workshop.dto.CurrencyDTO;
 import com.example.workshop.exception.InvalidCurrencyCodeException;
 import com.example.workshop.model.Currency;
 import com.example.workshop.repository.CurrencyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +32,10 @@ public class CurrencyService {
      *
      * @return list of all currencies, sorted by code
      */
+    @Cacheable(value = CacheConfig.CURRENCIES_CACHE, key = "'all'")
     @Transactional(readOnly = true)
     public List<Currency> getAllCurrencies() {
-        log.debug("Fetching all currencies from database");
+        log.debug("Fetching all currencies from database (cache miss)");
 
         return currencyRepository.findAll().stream()
                 .sorted((c1, c2) -> c1.getCode().compareTo(c2.getCode()))
@@ -44,9 +48,10 @@ public class CurrencyService {
      * @param code the currency code (e.g., USD, EUR)
      * @return Optional containing the currency if found
      */
+    @Cacheable(value = CacheConfig.CURRENCY_BY_CODE_CACHE, key = "#code")
     @Transactional(readOnly = true)
     public Optional<Currency> findByCode(String code) {
-        log.debug("Finding currency by code: {}", code);
+        log.debug("Finding currency by code: {} (cache miss)", code);
 
         if (code == null || code.isBlank()) {
             return Optional.empty();
@@ -64,6 +69,7 @@ public class CurrencyService {
      * @throws InvalidCurrencyCodeException if the code is invalid
      * @throws IllegalStateException if the currency already exists
      */
+    @CacheEvict(value = {CacheConfig.CURRENCIES_CACHE, CacheConfig.CURRENCY_BY_CODE_CACHE}, allEntries = true)
     @Transactional
     public Currency addCurrency(String code) {
         log.info("Adding new currency: {}", code);
@@ -88,7 +94,7 @@ public class CurrencyService {
                 .build();
 
         Currency savedCurrency = currencyRepository.save(currency);
-        log.info("Successfully added currency: {}", savedCurrency.getCode());
+        log.info("Successfully added currency: {} (cache evicted)", savedCurrency.getCode());
 
         return savedCurrency;
     }
@@ -102,6 +108,7 @@ public class CurrencyService {
      * @throws InvalidCurrencyCodeException if the code is invalid
      * @throws IllegalStateException if the currency already exists
      */
+    @CacheEvict(value = {CacheConfig.CURRENCIES_CACHE, CacheConfig.CURRENCY_BY_CODE_CACHE}, allEntries = true)
     @Transactional
     public Currency addCurrency(String code, String name) {
         log.info("Adding new currency: {} with name: {}", code, name);
@@ -130,7 +137,7 @@ public class CurrencyService {
                 .build();
 
         Currency savedCurrency = currencyRepository.save(currency);
-        log.info("Successfully added currency: {} - {}", savedCurrency.getCode(), savedCurrency.getName());
+        log.info("Successfully added currency: {} - {} (cache evicted)", savedCurrency.getCode(), savedCurrency.getName());
 
         return savedCurrency;
     }

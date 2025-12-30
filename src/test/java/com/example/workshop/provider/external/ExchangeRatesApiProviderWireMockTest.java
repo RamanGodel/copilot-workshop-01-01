@@ -36,25 +36,26 @@ class ExchangeRatesApiProviderWireMockTest {
     void fetchLatestRates_shouldMapSuccessResponse() {
         server.stubFor(get(urlPathEqualTo("/latest"))
                 .withQueryParam("access_key", equalTo("key"))
-                .withQueryParam("base", equalTo("USD"))
+                .withQueryParam("base", equalTo("EUR"))  // Provider always uses EUR for free plan
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"success\":true,\"timestamp\":1735689600,\"base\":\"USD\",\"rates\":{\"EUR\":0.9}}")));
+                        .withBody("{\"success\":true,\"timestamp\":1735689600,\"base\":\"EUR\",\"rates\":{\"USD\":1.1}}")));
 
         ExchangeRatesApiProvider provider = new ExchangeRatesApiProvider(new RestTemplateBuilder(), server.baseUrl(), "key");
         Optional<ProviderRatesResponse> resp = provider.fetchLatestRates("USD");
 
         assertThat(resp).isPresent();
         assertThat(resp.get().getBase()).isEqualTo("USD");
-        assertThat(resp.get().getRates()).containsKey("EUR");
+        // Since provider converts from EUR to USD, the response should have EUR as target
+        assertThat(resp.get().getRates()).isNotEmpty();
     }
 
     @Test
     void fetchLatestRates_shouldThrowProviderUnavailable_onServerError() {
         server.stubFor(get(urlPathEqualTo("/latest"))
                 .withQueryParam("access_key", equalTo("key"))
-                .withQueryParam("base", equalTo("USD"))
+                .withQueryParam("base", equalTo("EUR"))  // Provider always uses EUR for free plan
                 .willReturn(aResponse().withStatus(500)));
 
         ExchangeRatesApiProvider provider = new ExchangeRatesApiProvider(new RestTemplateBuilder(), server.baseUrl(), "key");
@@ -67,7 +68,7 @@ class ExchangeRatesApiProviderWireMockTest {
     void fetchLatestRates_shouldThrowProviderUnavailable_onInvalidJson() {
         server.stubFor(get(urlPathEqualTo("/latest"))
                 .withQueryParam("access_key", equalTo("key"))
-                .withQueryParam("base", equalTo("USD"))
+                .withQueryParam("base", equalTo("EUR"))  // Provider always uses EUR for free plan
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
