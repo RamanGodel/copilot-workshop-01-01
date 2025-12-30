@@ -5,3 +5,4 @@
 - Prefer SRS as the source of truth for requirements over individual design documents.
 - When updating design documents, ensure that the SRS is also updated to reflect any changes.
 - Try to add a new tests when a new feature is added or an existing feature is modified.
+- Do not commit and push changes without asking

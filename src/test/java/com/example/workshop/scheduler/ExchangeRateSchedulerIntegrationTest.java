@@ -33,6 +33,9 @@ class ExchangeRateSchedulerIntegrationTest {
     @Test
     void scheduledTaskCanBeInvokedManually() {
         // Given
+        // Reset mock to clear any startup initialization calls
+        reset(refreshService);
+        
         ExchangeRateRefreshService.RefreshSummary summary = new ExchangeRateRefreshService.RefreshSummary(
                 5, 5, 2, 20, Collections.emptyList()
         );
@@ -48,6 +51,9 @@ class ExchangeRateSchedulerIntegrationTest {
     @Test
     void scheduledTaskHandlesExceptions() {
         // Given
+        // Reset mock to clear any startup initialization calls
+        reset(refreshService);
+        
         when(refreshService.refreshAll()).thenThrow(new RuntimeException("Test exception"));
 
         // When - should not throw
