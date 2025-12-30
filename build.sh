@@ -93,8 +93,13 @@ fi
 
 # Check Java version
 JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-if [ "$JAVA_VERSION" -lt 21 ]; then
-    echo -e "${RED}Java 21 or higher is required. Current version: $JAVA_VERSION${NC}"
+if [ -z "$JAVA_VERSION" ]; then
+    # Fallback for different version format
+    JAVA_VERSION=$(java -version 2>&1 | head -n 1 | awk '{print $3}' | tr -d '"' | cut -d'.' -f1)
+fi
+
+if [ -z "$JAVA_VERSION" ] || [ "$JAVA_VERSION" -lt 21 ]; then
+    echo -e "${RED}Java 21 or higher is required. Current version: ${JAVA_VERSION:-unknown}${NC}"
     exit 1
 fi
 

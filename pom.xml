@@ -40,6 +40,12 @@
         <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
 
         <!-- Code Coverage Thresholds -->
+        <!-- Note: Branch coverage threshold is currently set low (15%) due to existing
+             codebase architecture. Recommended roadmap:
+             - Short-term (3 months): 25%
+             - Mid-term (6 months): 40%
+             - Long-term (12 months): 60%
+             Focus on adding tests for service layer and provider logic. -->
         <jacoco.line.coverage>0.75</jacoco.line.coverage>
         <jacoco.branch.coverage>0.15</jacoco.branch.coverage>
         <pitest.mutation.threshold>70</pitest.mutation.threshold>
@@ -249,6 +255,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
                     <excludes>
                         <exclude>**/*IntegrationTest.java</exclude>
                     </excludes>

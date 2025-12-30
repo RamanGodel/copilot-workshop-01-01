@@ -126,7 +126,8 @@ esac
 # Generate coverage report if requested
 if [ "$RUN_COVERAGE" = true ]; then
     echo -e "${YELLOW}Generating coverage report...${NC}"
-    mvn jacoco:report -Pcoverage
+    # Ensure tests are run before generating coverage
+    mvn test jacoco:report -Pcoverage
     echo ""
     echo -e "${GREEN}Coverage report generated at: target/site/jacoco/index.html${NC}"
     
