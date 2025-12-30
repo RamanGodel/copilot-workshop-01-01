@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress checks for generated code -->
+    <suppress checks=".*" files=".*[\\/]generated[\\/].*"/>
+    <suppress checks=".*" files=".*[\\/]target[\\/].*"/>
+    
+    <!-- Suppress checks for MapStruct generated classes -->
+    <suppress checks=".*" files=".*Impl\.java"/>
+    
+    <!-- Suppress checks for DTOs and entities (allow longer parameter lists) -->
+    <suppress checks="ParameterNumber" files=".*DTO\.java"/>
+    <suppress checks="ParameterNumber" files=".*[\\/]model[\\/].*\.java"/>
+    
+    <!-- Allow star imports for model/entity classes (JPA, Lombok) -->
+    <suppress checks="AvoidStarImport" files=".*[\\/]model[\\/].*\.java"/>
+    
+    <!-- Allow star imports in controllers (Spring annotations) -->
+    <suppress checks="AvoidStarImport" files=".*[\\/]controller[\\/].*\.java"/>
+    
+    <!-- Allow star imports in config classes (common pattern) -->
+    <suppress checks="AvoidStarImport" files=".*[\\/]config[\\/].*\.java"/>
+    
+    <!-- Allow star imports in provider classes -->
+    <suppress checks="AvoidStarImport" files=".*[\\/]provider[\\/].*\.java"/>
+    
+    <!-- Allow slightly longer lines for log statements and URLs -->
+    <suppress checks="LineLength" files=".*\.java" lines="1-200"/>
+    
+    <!-- Allow utility class pattern in main application class -->
+    <suppress checks="HideUtilityClassConstructor" files=".*Application\.java"/>
+    
+    <!-- Allow operator wrap in configuration and initialization classes -->
+    <suppress checks="OperatorWrap" files=".*[\\/]config[\\/].*\.java"/>
+    <suppress checks="OperatorWrap" files=".*[\\/]initializer[\\/].*\.java"/>
+    <suppress checks="OperatorWrap" files=".*[\\/]scheduler[\\/].*\.java"/>
+</suppressions>

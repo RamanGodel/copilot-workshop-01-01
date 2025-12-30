@@ -2,9 +2,6 @@ package com.example.workshop.provider;
 
 import java.util.Optional;
 
-import com.example.workshop.provider.ProviderRatesResponse;
-import com.example.workshop.provider.ProviderUnavailableException;
-
 /**
  * SPI for fetching exchange rates from an external system.
  *
