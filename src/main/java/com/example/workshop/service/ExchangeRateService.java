@@ -1,5 +1,6 @@
 package com.example.workshop.service;
 
+import com.example.workshop.config.CacheConfig;
 import com.example.workshop.dto.ExchangeRateRequestDTO;
 import com.example.workshop.dto.ExchangeRateResponseDTO;
 import com.example.workshop.exception.CurrencyNotFoundException;
@@ -10,6 +11,8 @@ import com.example.workshop.repository.CurrencyRepository;
 import com.example.workshop.repository.ExchangeRateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +43,10 @@ public class ExchangeRateService {
      * @throws CurrencyNotFoundException if either currency is not found
      * @throws ExchangeRateNotFoundException if no exchange rate is available
      */
+    @Cacheable(value = CacheConfig.LATEST_RATES_CACHE, key = "#request.from + '_' + #request.to")
     @Transactional(readOnly = true)
     public ExchangeRateResponseDTO getExchangeRate(ExchangeRateRequestDTO request) {
-        log.info("Getting exchange rate from {} to {} for amount {}",
+        log.info("Getting exchange rate from {} to {} for amount {} (cache miss)",
                 request.getFrom(), request.getTo(), request.getAmount());
 
         // Find currencies
@@ -79,9 +83,10 @@ public class ExchangeRateService {
      * @param rate the exchange rate to save
      * @return the saved exchange rate
      */
+    @CacheEvict(value = CacheConfig.LATEST_RATES_CACHE, allEntries = true)
     @Transactional
     public ExchangeRate saveExchangeRate(ExchangeRate rate) {
-        log.debug("Saving exchange rate: {} -> {}, rate: {}",
+        log.debug("Saving exchange rate: {} -> {}, rate: {} (cache evicted)",
                 rate.getBaseCurrency().getCode(),
                 rate.getTargetCurrency().getCode(),
                 rate.getRate());
@@ -99,10 +104,11 @@ public class ExchangeRateService {
      * @return the saved exchange rate
      * @throws CurrencyNotFoundException if either currency is not found
      */
+    @CacheEvict(value = CacheConfig.LATEST_RATES_CACHE, allEntries = true)
     @Transactional
     public ExchangeRate saveExchangeRate(String baseCurrencyCode, String targetCurrencyCode,
                                          BigDecimal rate, LocalDateTime timestamp) {
-        log.info("Saving exchange rate: {} -> {}, rate: {}", baseCurrencyCode, targetCurrencyCode, rate);
+        log.info("Saving exchange rate: {} -> {}, rate: {} (cache evicted)", baseCurrencyCode, targetCurrencyCode, rate);
 
         Currency baseCurrency = currencyRepository.findByCode(baseCurrencyCode)
                 .orElseThrow(() -> new CurrencyNotFoundException("Base currency not found: " + baseCurrencyCode));

@@ -1,11 +1,13 @@
 package com.example.workshop.service;
 
+import com.example.workshop.config.CacheConfig;
 import com.example.workshop.model.Currency;
 import com.example.workshop.provider.ExchangeRateProviderAggregator;
 import com.example.workshop.provider.ProviderRatesResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,7 +32,9 @@ public class ExchangeRateRefreshService {
      * Individual save failures (e.g., missing target currency) should not mark the whole
      * refresh as rollback-only.
      */
+    @CacheEvict(value = {CacheConfig.LATEST_RATES_CACHE}, allEntries = true)
     public RefreshSummary refreshAll() {
+        log.info("Refreshing all exchange rates - cache will be evicted");
         List<Currency> currencies = currencyService.getAllCurrencies();
 
         int currenciesProcessed = 0;
