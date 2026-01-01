@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .frameOptions(frame -> frame.sameOrigin()) // Allow H2 console for development
                 .contentSecurityPolicy(csp -> csp
                     .policyDirectives("default-src 'self'; " +
-                        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                        "script-src 'self'; " +
                         "style-src 'self' 'unsafe-inline'; " +
                         "img-src 'self' data:; " +
                         "font-src 'self' data:;"))
