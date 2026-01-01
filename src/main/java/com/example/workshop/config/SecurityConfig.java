@@ -95,8 +95,21 @@ public class SecurityConfig {
             )
             .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for API endpoints
             .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin()) // Allow H2 console
-            );
+                .frameOptions(frame -> frame.sameOrigin()) // Allow H2 console for development
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; " +
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data:; " +
+                        "font-src 'self' data:;"))
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)) // 1 year
+                .xssProtection(xss -> xss
+                    .headerValue(org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                .contentTypeOptions(cto -> cto.disable().disable())
+            )
+            .cors(cors -> cors.disable()); // CORS can be enabled via @CrossOrigin on controllers if needed
 
         return http.build();
     }
