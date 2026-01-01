@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -107,7 +108,7 @@ public class SecurityConfig {
                     .maxAgeInSeconds(31536000)) // 1 year
                 .xssProtection(xss -> xss
                     .headerValue(org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
-                .contentTypeOptions(cto -> cto.disable().disable())
+                .contentTypeOptions(Customizer.withDefaults())
             )
             .cors(cors -> cors.disable()); // CORS can be enabled via @CrossOrigin on controllers if needed
 
